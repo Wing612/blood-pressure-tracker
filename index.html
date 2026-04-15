@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#2196F3">
+<title>血壓心跳紀錄</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi6KuL5b2i5b+D6Leo6KiI6JSJIiwic2hvcnRfbmFtZSI6Iuari+W9ouW_gyIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Y1ZjVmNSIsInRoZW1lX2NvbG9yIjoiIzIxOTZGMyIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIyYVdWM1FtOTRQU0l3SURBZ01USTRJREV5T0NJZ2VHMXNibk05SW1oMGRIQTZMeTkzZDNjdWR6TXViM0puTHpJd01EQXZjM1puSWo0OGNtVmpkQ0IzYVdSMGFEMGlNVEF3SWk4K1BIUmxlSFFnZUQwaU5qUWlJSGs5SWpZd0lpQm1iMjUwTFhOcGVtVTlJalV3SWlCbWFXeHNQU0p0WVhOamQyOXlaQTlqZVdSa2RYSTlJalV3SWlCbWFXeHNQU0poY25rOUlqRXdNQ0lnWm1sc2JEMGlJekV5SWk4K1BIUmxlSFFnZUQwaU1qSWlJSGs5SWpZd0lpQm1iMjUwTFhOcGVtVTlJalV3SWlCbWFXeHNQU0p0WVhOamQyOXlaQTlqZVdSa2RYSTlJalV3SWlCbWFXeHNQU0poY25rOUlqRXdNQ0lnWm1sc2JEMGlNVEF3SWk4K1BDOXpkbWMrIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+<style>
+:root {
+  --primary: #2196F3; --primary-dark: #1976D2;
+  --success: #4CAF50; --warning: #FF9800; --danger: #f44336; --crisis: #B71C1C;
+  --bg: #f0f2f5; --card: #fff; --text: #333; --text2: #666; --text3: #999;
+  --border: #e8e8e8; --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+  background: var(--bg); color: var(--text);
+  padding: 0 0 80px; max-width: 600px; margin: 0 auto; min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: #fff; padding: 20px 16px 24px; text-align: center;
+  position: sticky; top: 0; z-index: 100;
+}
+.header h1 { font-size: 1.3em; font-weight: 700; }
+.header .sub { font-size: 0.8em; opacity: 0.8; margin-top: 4px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  margin: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ── Input ── */
+.input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.input-row label { flex: 1; }
+.input-row label span { display: block; font-size: 0.78em; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+input[type="number"], input[type="date"] {
+  width: 100%; padding: 10px 8px; border: 2px solid var(--border); border-radius: 10px;
+  font-size: 1.15em; text-align: center; transition: border-color 0.2s;
+  -webkit-appearance: none; appearance: none; background: #fafafa;
+}
+input:focus { border-color: var(--primary); outline: none; background: #fff; }
+input.warn { border-color: var(--warning); background: #FFF8E1; }
+input.danger { border-color: var(--danger); background: #FFEBEE; }
+
+/* ── Camera Button ── */
+.camera-section {
+  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  border: 2px dashed var(--primary); border-radius: var(--radius);
+  padding: 20px; text-align: center; margin-bottom: 12px;
+  cursor: pointer; transition: all 0.2s;
+}
+.camera-section:active { transform: scale(0.98); background: #C8E6C9; }
+.camera-section .icon { font-size: 2.5em; margin-bottom: 8px; }
+.camera-section .title { font-weight: 600; color: var(--primary-dark); font-size: 1em; }
+.camera-section .desc { font-size: 0.78em; color: var(--text2); margin-top: 4px; }
+
+/* ── Preview ── */
+#previewSection { display: none; }
+.preview-img {
+  width: 100%; max-height: 250px; object-fit: contain;
+  border-radius: 10px; border: 1px solid var(--border);
+}
+.ai-status {
+  display: flex; align-items: center; gap: 8px; padding: 10px;
+  border-radius: 10px; margin-top: 10px; font-size: 0.85em;
+}
+.ai-loading { background: #E3F2FD; color: var(--primary); }
+.ai-success { background: #E8F5E9; color: #2E7D32; }
+.ai-error { background: #FFEBEE; color: #C62828; }
+.ai-spinner {
+  width: 18px; height: 18px; border: 2px solid var(--primary);
+  border-top-color: transparent; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Buttons ── */
+.btn {
+  display: block; width: 100%; padding: 13px; border: none; border-radius: 10px;
+  font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-export { background: var(--success); color: #fff; margin-top: 8px; }
+.btn-chart { background: var(--warning); color: #fff; margin-top: 8px; }
+.btn-sm { padding: 8px 12px; font-size: 0.85em; width: auto; display: inline-block; }
+.btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); margin-top: 12px; font-size: 0.82em; }
+.btn-row { display: flex; gap: 8px; margin-top: 10px; }
+.btn-row .btn { flex: 1; }
+
+/* ── Messages ── */
+.toast {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  padding: 10px 20px; border-radius: 10px; font-size: 0.9em; z-index: 200;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s;
+  max-width: 90%; text-align: center;
+}
+.toast.show { opacity: 1; }
+.toast-ok { background: #E8F5E9; color: #2E7D32; }
+.toast-warn { background: #FFF8E1; color: #E65100; }
+.toast-err { background: #FFEBEE; color: #C62828; }
+
+/* ── Live Warning ── */
+.live-warn {
+  color: var(--warning); font-size: 0.82em; margin-top: 4px;
+  min-height: 1.2em; padding-left: 2px;
+}
+
+/* ── Stats ── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+.stats-grid .val { font-size: 1.4em; font-weight: 700; color: var(--primary); }
+.stats-grid .lbl { font-size: 0.7em; color: var(--text3); margin-top: 2px; }
+
+/* ── Records ── */
+.record-list { max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.record-item {
+  display: flex; align-items: center; padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5; gap: 10px;
+}
+.record-item:last-child { border-bottom: none; }
+.rec-date { font-size: 0.78em; color: var(--text3); min-width: 52px; text-align: center; line-height: 1.2; }
+.rec-bp { flex: 1; font-weight: 700; font-size: 1.05em; }
+.rec-hr { font-size: 0.88em; color: var(--text2); min-width: 50px; text-align: right; }
+.rec-del {
+  background: none; border: none; color: #ddd; font-size: 1.3em;
+  cursor: pointer; padding: 2px 6px; line-height: 1;
+}
+.rec-del:active { color: var(--danger); }
+
+/* ── Badge ── */
+.badge {
+  display: inline-block; padding: 2px 7px; border-radius: 6px;
+  font-size: 0.68em; font-weight: 700; color: #fff; margin-left: 6px;
+  vertical-align: middle; letter-spacing: 0.3px;
+}
+.badge-normal { background: var(--success); }
+.badge-elevated { background: #FFC107; color: #333; }
+.badge-high1 { background: var(--warning); }
+.badge-high2 { background: var(--danger); }
+.badge-crisis { background: var(--crisis); }
+
+/* ── Chart ── */
+#chartSection { display: none; }
+.chart-box { position: relative; height: 260px; }
+
+/* ── Empty ── */
+.empty-state { text-align: center; color: var(--text3); padding: 24px 16px; }
+.empty-state .icon { font-size: 2.5em; margin-bottom: 8px; }
+
+/* ── API Key Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;
+}
+.modal-box h3 { margin-bottom: 12px; }
+.modal-box p { font-size: 0.85em; color: var(--text2); margin-bottom: 12px; }
+.modal-box input {
+  width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px;
+  font-size: 0.95em; margin-bottom: 8px;
+}
+.modal-box .btn { margin-top: 8px; }
+.modal-box .btn-secondary { background: #e0e0e0; color: var(--text); }
+
+/* ── Number Stepper ── */
+.stepper-wrap {
+  display: flex; align-items: center; gap: 2px;
+  background: #fafafa; border: 2px solid var(--border); border-radius: 10px;
+  overflow: hidden; transition: border-color 0.2s;
+}
+.stepper-wrap:focus-within { border-color: var(--primary); background: #fff; }
+.stepper-wrap.warn { border-color: var(--warning); background: #FFF8E1; }
+.stepper-wrap.danger { border-color: var(--danger); background: #FFEBEE; }
+.stepper-btn {
+  width: 40px; height: 44px; border: none; background: none;
+  font-size: 1.3em; color: var(--primary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+  transition: background 0.1s;
+}
+.stepper-btn:active { background: #E3F2FD; }
+.stepper-val {
+  flex: 1; text-align: center; font-size: 1.2em; font-weight: 600;
+  border: none; background: transparent; outline: none; min-width: 40px;
+  -webkit-appearance: none; appearance: none;
+  font-family: inherit;
+}
+.stepper-val::-webkit-inner-spin-button,
+.stepper-val::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper-val[type=number] { -moz-appearance: textfield; }
+
+/* ── Section Title ── */
+.section-title {
+  font-size: 0.85em; font-weight: 600; color: var(--text2);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🩺 血壓心跳紀錄</h1>
+  <div class="sub">拍照辨識 · 趨勢分析 · Excel 匯出</div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Camera Section -->
+<div class="card">
+  <div style="display:flex;align-items:center;gap:8px;padding:0 8px 8px 0">
+    <div style="flex:1"></div>
+    <button onclick="document.getElementById('apiModal').classList.add('show')" style="background:none;border:1px solid #ccc;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:0.8em;color:#666" title="設定 API Key">⚙️ AI 設定</button>
+  </div>
+  <div class="camera-section" onclick="openCamera()">
+    <div class="icon">📷</div>
+    <div class="title">拍照辨識血壓</div>
+    <div class="desc">AI 視覺自動辨識（推薦）或 OCR 備援</div>
+  </div>
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+  <div id="previewSection">
+    <img id="previewImg" class="preview-img" alt="預覽">
+    <div id="aiStatus" class="ai-status" style="display:none"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-sm" style="background:#e0e0e0;color:#333" onclick="clearPreview()">✕ 重拍</button>
+      <button class="btn btn-sm btn-primary" id="btnRetryAI" style="display:none" onclick="retryAI()">🔄 重新辨識</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manual Input -->
+<div class="card">
+  <div class="section-title">✏️ 手動輸入</div>
+  <div class="input-row">
+    <label>
+      <span>📅 日期</span>
+      <input type="date" id="inpDate">
+    </label>
+    <label>
+      <span>💓 心跳 (下/分)</span>
+      <div class="stepper-wrap" id="hrWrap">
+        <button class="stepper-btn" onclick="stepVal('inpHR',-1)" type="button">−</button>
+        <input type="number" class="stepper-val" id="inpHR" placeholder="72" inputmode="numeric">
+        <button class="stepper-btn" onclick="stepVal('inpHR',1)" type="button">+</button>
+      </div>
+    </label>
+  </div>
+  <div class="input-row">
+    <label>
+      <span>🔴 收縮壓 (mmHg)</span>
+      <div class="stepper-wrap" id="sysWrap">
+        <button class="stepper-btn" onclick="stepVal('inpSys',-1)" type="button">−</button>
+        <input type="number" class="stepper-val" id="inpSys" placeholder="120" inputmode="numeric">
+        <button class="stepper-btn" onclick="stepVal('inpSys',1)" type="button">+</button>
+      </div>
+    </label>
+    <label>
+      <span>🔵 舒張壓 (mmHg)</span>
+      <div class="stepper-wrap" id="diaWrap">
+        <button class="stepper-btn" onclick="stepVal('inpDia',-1)" type="button">−</button>
+        <input type="number" class="stepper-val" id="inpDia" placeholder="80" inputmode="numeric">
+        <button class="stepper-btn" onclick="stepVal('inpDia',1)" type="button">+</button>
+      </div>
+    </label>
+  </div>
+  <div class="input-row">
+    <label style="flex:2">
+      <span>💊 每日用藥（選填）</span>
+      <input type="text" id="inpMed" placeholder="例：早上1顆Sevikar HCT" style="text-align:left;font-size:0.9em">
+    </label>
+  </div>
+  <div id="liveWarn" class="live-warn"></div>
+  <button class="btn btn-primary" onclick="addRecord()" style="margin-top:10px">➕ 儲存紀錄</button>
+</div>
+
+<!-- Stats -->
+<div class="card" id="statsCard" style="display:none">
+  <div class="section-title">📊 統計摘要</div>
+  <div class="stats-grid">
+    <div><div class="val" id="statTotal">0</div><div class="lbl">總筆數</div></div>
+    <div><div class="val" id="statAvgSys">-</div><div class="lbl">收縮壓</div></div>
+    <div><div class="val" id="statAvgDia">-</div><div class="lbl">舒張壓</div></div>
+    <div><div class="val" id="statAvgHR">-</div><div class="lbl">心跳</div></div>
+  </div>
+</div>
+
+<!-- History -->
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="section-title" style="margin:0">📋 歷史紀錄</div>
+    <span id="countBadge" style="color:var(--text3);font-size:0.8em"></span>
+  </div>
+  <div id="recordList" class="record-list"></div>
+</div>
+
+<!-- Action Buttons -->
+<div class="btn-row" style="margin:0 12px">
+  <button class="btn btn-chart" onclick="toggleChart()">📈 趨勢圖</button>
+  <button class="btn btn-export" onclick="exportExcel()">📊 匯出 Excel</button>
+</div>
+<div style="margin:8px 12px 0">
+  <button class="btn" style="background:#7B1FA2;color:#fff" onclick="document.getElementById('excelFileInput').click()">📥 從 Excel 檔案匯入歷史資料</button>
+  <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none">
+</div>
+
+<!-- Chart -->
+<div class="card" id="chartSection">
+  <div class="section-title">📈 血壓與心跳趨勢</div>
+  <div class="chart-box"><canvas id="bpChart"></canvas></div>
+</div>
+
+<!-- Danger Zone -->
+<div style="text-align:center;padding:0 12px">
+  <button class="btn btn-danger" onclick="clearAll()">🗑️ 清除所有紀錄</button>
+</div>
+
+<!-- API Key Modal -->
+<div id="apiModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>🔑 AI 視覺辨識設定</h3>
+    <p>AI 視覺模型能「看懂」LCD 螢幕上的數字，比 OCR 準確得多。</p>
+    <label style="font-size:0.85em;font-weight:bold">OpenRouter API Key：</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-xxxxxxxxxxxx" style="margin-top:4px">
+    <p style="font-size:0.78em;line-height:1.6">
+      <b>如何取得免費 API Key：</b><br>
+      1. 前往 <a href="https://openrouter.ai" target="_blank">openrouter.ai</a> 註冊（免費）<br>
+      2. 登入後到 Keys 頁面，建立新 Key<br>
+      3. 複製 Key（格式：<code>sk-or-v1-...</code>）貼到上方欄位<br>
+      4. 免費帳號每天 50 次 AI 辨識，夠用<br>
+      <span style="color:#888">• 金鑰只存在本機瀏覽器，不會上傳</span>
+    </p>
+    <button class="btn btn-primary" onclick="saveApiKey()">💾 儲存並開始辨識</button>
+    <button class="btn btn-secondary" onclick="closeApiModal()">取消</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const STORAGE_KEY = 'bpData';
+const API_KEY_STORAGE = 'bp_openrouter_api_key';
+let chart = null;
+let pendingImageBase64 = null;
+
+// ── Data (with error handling + fallback) ──
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e) { console.error('getData error:', e); return []; }
+}
+function saveData(d) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    return true;
+  } catch(e) {
+    console.error('saveData error:', e);
+    showToast('⚠️ 儲存失敗！可能是瀏覽器隱私模式或儲存空間已滿', 'err');
+    return false;
+  }
+}
+function getApiKey() {
+  try { return localStorage.getItem(API_KEY_STORAGE) || ''; }
+  catch(e) { return ''; }
+}
+
+// ── BP Categories ──
+function getBPCategory(sys, dia) {
+  if (sys > 180 || dia > 120) return { label: '危險', cls: 'badge-crisis' };
+  if (sys >= 140 || dia >= 90) return { label: '高血壓2期', cls: 'badge-high2' };
+  if (sys >= 130 || dia >= 80) return { label: '高血壓1期', cls: 'badge-high1' };
+  if (sys >= 120 && dia < 80) return { label: '偏高', cls: 'badge-elevated' };
+  return { label: '正常', cls: 'badge-normal' };
+}
+
+// ── Validation ──
+function validate(sys, dia, hr) {
+  const w = [];
+  if (isNaN(sys) || isNaN(dia) || isNaN(hr)) w.push('請填寫所有欄位');
+  if (sys < 60 || sys > 250) w.push('收縮壓需在 60-250 之間');
+  if (dia < 40 || dia > 150) w.push('舒張壓需在 40-150 之間');
+  if (hr < 30 || hr > 220) w.push('心跳需在 30-220 之間');
+  if (!isNaN(sys) && !isNaN(dia) && dia >= sys) w.push('⚠️ 舒張壓不應 ≥ 收縮壓');
+  if (sys > 200) w.push('⚠️ 收縮壓異常偏高');
+  if (hr < 40 || hr > 180) w.push('⚠️ 心跳數值異常');
+  return w;
+}
+
+// ── Toast ──
+function showToast(text, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.className = `toast toast-${type} show`;
+  el.textContent = text;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Camera / Photo ──
+function openCamera() {
+  document.getElementById('cameraInput').click();
+}
+
+document.getElementById('cameraInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    pendingImageBase64 = ev.target.result;
+    document.getElementById('previewImg').src = pendingImageBase64;
+    document.getElementById('previewSection').style.display = '';
+    recognizeWithAI(pendingImageBase64);
+  };
+  reader.readAsDataURL(file);
+  // Reset input so same file can be re-selected
+  e.target.value = '';
+});
+
+function clearPreview() {
+  document.getElementById('previewSection').style.display = 'none';
+  document.getElementById('aiStatus').style.display = 'none';
+  document.getElementById('btnRetryAI').style.display = 'none';
+  pendingImageBase64 = null;
+}
+
+function retryAI() {
+  if (pendingImageBase64) recognizeWithAI(pendingImageBase64);
+}
+
+// ── AI Recognition ──
+// ── OCR: Tesseract.js (本地免費) + OpenRouter AI (備用) ──
+
+// ── Smart BP parser: range + position + pattern multi-strategy ──
+function parseBPFromText(text) {
+  const raw = text;
+  let sys = null, dia = null, hr = null;
+
+  // ── Strategy 1: Label-based extraction (highest priority) ──
+  // SYS patterns: "SYS 142", "SYS:142", "收縮壓 142", "Systolic: 142"
+  const sysLabel = raw.match(/(?:SYS|SYs|Systolic|收缩|收縮)[:\s]*(\d{2,3})/i);
+  const diaLabel = raw.match(/(?:DIA|Dia|Diastolic|舒张|舒張)[:\s]*(\d{2,3})/i);
+  const hrLabel  = raw.match(/(?:HR|PR|PULSe?|Pulse|心跳|脈搏|bpm|BPM)[:\s]*(\d{2,3})/i);
+  if (sysLabel) sys = parseInt(sysLabel[1]);
+  if (diaLabel) dia = parseInt(diaLabel[1]);
+  if (hrLabel)  hr  = parseInt(hrLabel[1]);
+
+  // ── Strategy 2: "XXX/YYY mmHg" or "XXX/YYY" pattern ──
+  if (!sys || !dia) {
+    const bpPat = raw.match(/(\d{2,3})\s*[\/\\|]\s*(\d{2,3})/);
+    if (bpPat) {
+      const a = parseInt(bpPat[1]), b = parseInt(bpPat[2]);
+      if (a >= 80 && a <= 220 && b >= 40 && b <= 130 && a > b) {
+        if (!sys) sys = a;
+        if (!dia) dia = b;
+      }
+    }
+  }
+
+  // ── Strategy 3: Position-based — extract ALL 2-3 digit numbers in order ──
+  // Most BP monitors show: SYS (large) → DIA (medium) → HR (pulse)
+  // We scan left-to-right / top-to-bottom and use range to classify
+  if (!sys || !dia) {
+    const cleaned = raw.replace(/[^\d\s\n\r\/\.\-mmHgbpm]/gi, ' ');
+    // Split by lines first (monitors often show values on separate lines)
+    const lines = cleaned.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
+    const allNums = [];
+    for (const line of lines) {
+      const matches = line.match(/\d{2,3}/g);
+      if (matches) matches.forEach(n => allNums.push(parseInt(n)));
+    }
+
+    // Classify by range + order
+    // SYS candidates: 90-220 (typically largest number on screen)
+    // DIA candidates: 40-130 (typically second largest, always < SYS)
+    // HR candidates:  35-180 (often on separate line with "PULSE" label)
+    const sysCands = allNums.filter(n => n >= 90 && n <= 220);
+    const diaCands = allNums.filter(n => n >= 40 && n <= 130 && n < 160);
+    const hrCands  = allNums.filter(n => n >= 35 && n <= 180);
+
+    if (!sys && sysCands.length > 0) {
+      // Take the largest SYS-range number
+      sys = Math.max(...sysCands);
+    }
+    if (!dia && diaCands.length > 0) {
+      // DIA must be < SYS and within 20-80 of SYS
+      const validDia = diaCands.filter(d => d < sys && (sys - d) >= 15 && (sys - d) <= 90);
+      if (validDia.length > 0) {
+        // Take the one closest to typical DIA range (60-90)
+        dia = validDia.reduce((best, cur) => {
+          const bestDist = Math.abs(best - 75);
+          const curDist = Math.abs(cur - 75);
+          return curDist < bestDist ? cur : best;
+        });
+      } else {
+        // Fallback: largest DIA candidate that's < SYS
+        const fallbackDia = diaCands.filter(d => d < sys);
+        if (fallbackDia.length > 0) dia = Math.max(...fallbackDia);
+      }
+    }
+    if (!hr && hrCands.length > 0) {
+      // HR should differ from sys and dia
+      const hrValid = hrCands.filter(h => h !== sys && h !== dia);
+      if (hrValid.length > 0) hr = hrValid[0];
+    }
+  }
+
+  // ── Strategy 4: Three-number sequence (most common BP monitor layout) ──
+  // Many monitors display: SYS / DIA / PULSE as 3 numbers in a row or column
+  // e.g., "126 72 73" or "126/72/73" or line1=126 line2=72 line3=73
+  if (!sys || !dia) {
+    const cleaned = raw.replace(/[^\d\s\n\r\/\.\-]/g, ' ');
+    const allNums = cleaned.match(/\d{2,3}/g)?.map(Number) || [];
+    const validNums = allNums.filter(n => n >= 30 && n <= 250);
+
+    // Look for pattern: 3 numbers where first > second and both are BP-range
+    for (let i = 0; i < validNums.length - 2; i++) {
+      const a = validNums[i], b = validNums[i+1], c = validNums[i+2];
+      // Pattern: SYS DIA HR (e.g., 126 72 73)
+      if (a >= 80 && a <= 220 && b >= 40 && b <= 130 && a > b && (a-b) >= 15 && (a-b) <= 90) {
+        if (!sys) sys = a;
+        if (!dia) dia = b;
+        if (!hr && c >= 35 && c <= 180 && c !== a && c !== b) hr = c;
+        break;
+      }
+    }
+
+    // Also try 2-number pattern: SYS DIA (e.g., 126/72)
+    if (!sys || !dia) {
+      for (let i = 0; i < validNums.length - 1; i++) {
+        const a = validNums[i], b = validNums[i+1];
+        if (a >= 80 && a <= 220 && b >= 40 && b <= 130 && a > b && (a-b) >= 15 && (a-b) <= 90) {
+          if (!sys) sys = a;
+          if (!dia) dia = b;
+          break;
+        }
+      }
+    }
+
+    // HR = any remaining number in HR range that isn't sys or dia
+    if (!hr) {
+      for (const n of validNums) {
+        if (n !== sys && n !== dia && n >= 35 && n <= 180) { hr = n; break; }
+      }
+    }
+  }
+
+  // ── Strategy 5: Line-level context parsing ──
+  // Some monitors: "PULSE 72/min" or "bpm: 68" on separate line
+  if (!hr) {
+    const pulseLine = raw.match(/(?:pulse|心跳|bpm|PR)\D{0,5}(\d{2,3})/i);
+    if (pulseLine) hr = parseInt(pulseLine[1]);
+  }
+
+  // ── Validation ──
+  if (sys && (sys < 60 || sys > 250)) sys = null;
+  if (dia && (dia < 40 || dia > 150)) dia = null;
+  if (hr  && (hr  < 30 || hr  > 220)) hr  = null;
+  if (sys && dia && dia >= sys) {
+    // Swap if reversed (OCR error)
+    if (dia > sys && dia <= 220 && sys >= 40) { const tmp = sys; sys = dia; dia = tmp; }
+    else dia = null;
+  }
+
+  return { sys, dia, hr };
+}
+
+// Main recognition function: Tesseract first, OpenRouter fallback
+async function recognizeWithAI(imageDataUrl) {
+  const statusEl = document.getElementById('aiStatus');
+  const retryBtn = document.getElementById('btnRetryAI');
+  retryBtn.style.display = 'none';
+
+  statusEl.className = 'ai-status ai-loading';
+  statusEl.innerHTML = '<div class="ai-spinner"></div> 正在辨識中（首次約 10-20 秒）...';
+  statusEl.style.display = 'flex';
+
+  try {
+    const apiKey = getApiKey();
+
+    // ── AI 視覺為主（LCD 七段顯示器 OCR 無解，AI 才能「看懂」圖片）──
+    let parsed = { sys: null, dia: null, hr: null };
+    let ocrText = '';
+
+    if (apiKey) {
+      // 有 API Key → 直接用 AI 視覺，跳過 Tesseract
+      statusEl.innerHTML = '<div class="ai-spinner"></div> AI 視覺辨識中...';
+      try {
+        parsed = await recognizeWithOpenRouter(imageDataUrl, apiKey);
+        console.log('AI parsed:', parsed);
+        statusEl.innerHTML = '<div class="ai-spinner"></div> AI 辨識完成，結果確認中...';
+      } catch (aiErr) {
+        console.warn('OpenRouter AI failed:', aiErr);
+        statusEl.innerHTML = `<div class="ai-spinner"></div> AI 辨識失敗（${aiErr.message}），嘗試 OCR 備援...`;
+        // AI 失敗才 fallback 到 OCR
+        const ocrResult = await tryTesseractOCR(imageDataUrl, statusEl);
+        ocrText = ocrResult.text;
+        parsed = ocrResult.parsed;
+      }
+    } else {
+      // 沒 API Key → 用 OCR（效果有限，會提示開啟 AI）
+      statusEl.innerHTML = '<div class="ai-spinner"></div> OCR 辨識中（效果有限，建議開啟 AI 視覺）...';
+      const ocrResult = await tryTesseractOCR(imageDataUrl, statusEl);
+      ocrText = ocrResult.text;
+      parsed = ocrResult.parsed;
+    }
+
+    // ── Fill in the values ──
+    let filled = [];
+    if (parsed.sys && parsed.sys >= 60 && parsed.sys <= 250) {
+      document.getElementById('inpSys').value = parsed.sys;
+      filled.push('收縮壓 ' + parsed.sys);
+    }
+    if (parsed.dia && parsed.dia >= 40 && parsed.dia <= 150) {
+      document.getElementById('inpDia').value = parsed.dia;
+      filled.push('舒張壓 ' + parsed.dia);
+    }
+    if (parsed.hr && parsed.hr >= 30 && parsed.hr <= 220) {
+      document.getElementById('inpHR').value = parsed.hr;
+      filled.push('心跳 ' + parsed.hr);
+    }
+
+    // Trigger live validation
+    document.getElementById('inpSys').dispatchEvent(new Event('input'));
+
+    if (filled.length > 0) {
+      statusEl.className = 'ai-status ai-success';
+      statusEl.innerHTML = '✅ 辨識成功：' + filled.join(' / ');
+
+      // Show debug info (collapsible)
+      const debugText = ocrText.trim().replace(/\n/g, ' ').substring(0, 200);
+      statusEl.innerHTML += `<details style="margin-top:6px;font-size:0.8em;opacity:0.7"><summary>🔍 除錯資訊</summary>
+        <div style="text-align:left;margin-top:4px;padding:6px;background:#f5f5f5;border-radius:6px;font-family:monospace;font-size:0.9em;word-break:break-all">
+        <b>OCR原文：</b>${debugText || '(empty)'}<br>
+        <b>解析結果：</b>SYS=${parsed.sys||'null'} DIA=${parsed.dia||'null'} HR=${parsed.hr||'null'}
+        </div></details>`;
+
+      showToast('辨識完成！', 'ok');
+
+      // Auto-save if all 3 values found
+      if (parsed.sys && parsed.dia && parsed.hr) {
+        const date = document.getElementById('inpDate').value;
+        if (date) {
+          const warns = validate(parsed.sys, parsed.dia, parsed.hr);
+          if (warns.length === 0) {
+            const data = getData();
+            const existing = data.findIndex(r => r.date === date);
+            const rec = { date, sys: parsed.sys, dia: parsed.dia, hr: parsed.hr, med: document.getElementById('inpMed').value.trim(), ts: Date.now() };
+            if (existing >= 0) {
+              data[existing] = rec;
+            } else {
+              data.push(rec);
+            }
+            data.sort((a, b) => b.date.localeCompare(a.date));
+            if (saveData(data)) {
+              render();
+              const cat = getBPCategory(parsed.sys, parsed.dia);
+              statusEl.innerHTML += `<br>💾 已自動儲存 ${date}（${cat.label}）`;
+              showToast(`✅ 已儲存 ${date}（${cat.label}）`, 'ok');
+              // Clear inputs after auto-save
+              setTimeout(() => {
+                document.getElementById('inpSys').value = '';
+                document.getElementById('inpDia').value = '';
+                document.getElementById('inpHR').value = '';
+                clearPreview();
+              }, 1500);
+            }
+          }
+        }
+      }
+    } else {
+      statusEl.className = 'ai-status ai-error';
+      const debugText = ocrText.trim().replace(/\n/g, ' ').substring(0, 200);
+      statusEl.innerHTML = '⚠️ 無法辨識數值。LCD 螢幕的七段數字不適合 OCR 辨識，建議使用 AI 視覺。' +
+        `<details style="margin-top:6px;font-size:0.8em"><summary>🔍 除錯資訊</summary>
+        <div style="text-align:left;margin-top:4px;padding:6px;background:#f5f5f5;border-radius:6px;font-family:monospace;font-size:0.9em;word-break:break-all">
+        <b>OCR原文：</b>${debugText || '(empty)'}<br>
+        <b>解析：</b>SYS=${parsed.sys||'null'} DIA=${parsed.dia||'null'} HR=${parsed.hr||'null'}
+        </div></details>`;
+      retryBtn.style.display = '';
+      // Show API modal option — AI is the real solution for LCD displays
+      if (!getApiKey()) {
+        statusEl.innerHTML += '<br><button class="btn btn-sm" style="margin-top:6px;background:#E3F2FD;color:#1565C0;border:2px solid #1565C0;font-weight:bold" onclick="document.getElementById(\'apiModal\').classList.add(\'show\')">🔑 開啟 AI 視覺辨識（免費）</button>';
+        statusEl.innerHTML += '<br><small style="opacity:0.7">OpenRouter 免費帳號每天 50 次，足夠日常使用</small>';
+      }
+    }
+
+  } catch (err) {
+    console.error('OCR error:', err);
+    statusEl.className = 'ai-status ai-error';
+    statusEl.innerHTML = '❌ 辨識失敗：' + err.message;
+    retryBtn.style.display = '';
+  }
+}
+
+// ── Tesseract OCR helper (fallback only, LCD displays are hard for OCR) ──
+async function tryTesseractOCR(imageDataUrl, statusEl) {
+  let bestParsed = { sys: null, dia: null, hr: null };
+  let bestText = '';
+
+  // Only try original + one enhanced version (skip binarization, it creates noise)
+  const variants = [
+    ['原始圖片', imageDataUrl],
+    ['增強對比', await preprocessSingle(imageDataUrl)]
+  ];
+
+  for (const [label, imgSrc] of variants) {
+    if (!imgSrc) continue;
+    statusEl.innerHTML = `<div class="ai-spinner"></div> OCR 備援中（${label}）...`;
+    try {
+      const result = await Tesseract.recognize(imgSrc, 'eng', {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            const pct = Math.round(m.progress * 100);
+            statusEl.innerHTML = `<div class="ai-spinner"></div> OCR（${label}）... ${pct}%`;
+          }
+        }
+      });
+      const text = result.data.text;
+      console.log(`OCR [${label}] raw:`, JSON.stringify(text));
+      const parsed = parseBPFromText(text);
+      console.log(`OCR [${label}] parsed:`, parsed);
+      const score = (parsed.sys ? 1 : 0) + (parsed.dia ? 1 : 0) + (parsed.hr ? 1 : 0);
+      const bestScore = (bestParsed.sys ? 1 : 0) + (bestParsed.dia ? 1 : 0) + (bestParsed.hr ? 1 : 0);
+      if (score > bestScore) { bestText = text; bestParsed = parsed; }
+      if (score === 3) break;
+    } catch (e) { console.warn(`OCR [${label}] failed:`, e); }
+  }
+  return { text: bestText, parsed: bestParsed };
+}
+
+// Single-pass mild contrast enhancement (for OCR fallback)
+function preprocessSingle(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, c.width, c.height);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+        let val = (gray - 128) * 1.3 + 128;
+        val = Math.max(0, Math.min(255, val));
+        d[i] = d[i+1] = d[i+2] = val;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      resolve(c.toDataURL('image/jpeg', 0.9));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+// ── Image pre-processing for better OCR ──
+// Returns array of [label, dataUrl] pairs for multi-pass OCR attempts
+function preprocessImage(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      const results = [];
+
+      // Pass 1: Original image (no processing) — often best for LCD/LED displays
+      results.push(['原始圖片', dataUrl]);
+
+      // Pass 2: Mild contrast enhancement (no destructive threshold)
+      const c1 = document.createElement('canvas');
+      c1.width = img.width; c1.height = img.height;
+      const ctx1 = c1.getContext('2d');
+      ctx1.drawImage(img, 0, 0);
+      const imgData1 = ctx1.getImageData(0, 0, c1.width, c1.height);
+      const d1 = imgData1.data;
+      // Mild contrast: stretch around midpoint, no hard threshold
+      for (let i = 0; i < d1.length; i += 4) {
+        const gray = 0.299 * d1[i] + 0.587 * d1[i+1] + 0.114 * d1[i+2];
+        // Gentle S-curve contrast: 1.3x with soft clipping
+        let val = (gray - 128) * 1.3 + 128;
+        val = Math.max(0, Math.min(255, val));
+        d1[i] = d1[i+1] = d1[i+2] = val;
+      }
+      ctx1.putImageData(imgData1, 0, 0);
+      results.push(['增強對比', c1.toDataURL('image/jpeg', 0.9)]);
+
+      // Pass 3: Adaptive-ish binarization (Otsu-inspired, wider tolerance)
+      const c2 = document.createElement('canvas');
+      c2.width = img.width; c2.height = img.height;
+      const ctx2 = c2.getContext('2d');
+      ctx2.drawImage(img, 0, 0);
+      const imgData2 = ctx2.getImageData(0, 0, c2.width, c2.height);
+      const d2 = imgData2.data;
+      // First pass: compute mean gray
+      let sumGray = 0, count = 0;
+      const grays = new Float32Array(d2.length / 4);
+      for (let i = 0; i < d2.length; i += 4) {
+        const g = 0.299 * d2[i] + 0.587 * d2[i+1] + 0.114 * d2[i+2];
+        grays[i/4] = g;
+        sumGray += g; count++;
+      }
+      const meanGray = sumGray / count;
+      // Second pass: binarize around mean with margin
+      const threshold = meanGray; // adaptive threshold
+      for (let i = 0; i < d2.length; i += 4) {
+        const g = grays[i/4];
+        const val = g > threshold ? 255 : 0;
+        d2[i] = d2[i+1] = d2[i+2] = val;
+      }
+      ctx2.putImageData(imgData2, 0, 0);
+      results.push(['二值化', c2.toDataURL('image/png')]);
+
+      resolve(results);
+    };
+    img.onerror = () => resolve([['原始圖片', dataUrl]]);
+    img.src = dataUrl;
+  });
+}
+
+// Compress image to max dimension for API calls
+function compressImage(dataUrl, maxDim) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      let w = img.width, h = img.height;
+      if (w <= maxDim && h <= maxDim) { resolve(dataUrl); return; }
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+// ── OpenRouter Vision API ──
+async function recognizeWithOpenRouter(imageDataUrl, apiKey) {
+  // Compress image to 640px for faster API response
+  const compressedImg = await compressImage(imageDataUrl, 640);
+
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify({
+      model: 'google/gemma-3-27b-it:free',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: compressedImg } },
+          { type: 'text', text: 'Look at this blood pressure monitor display. Find these 3 values:\n' +
+            '- SYS: systolic pressure (number next to "SYS" label, typically 90-200)\n' +
+            '- DIA: diastolic pressure (number next to "DIA" label, typically 50-130)\n' +
+            '- HR/PULSE: heart rate (number next to "PULSE" or "HR" label, typically 40-150)\n\n' +
+            'Reply with ONLY a JSON object, nothing else:\n' +
+            '{"sys":number,"dia":number,"hr":number}\n' +
+            'Use null if you cannot read a value. Do NOT guess — only report numbers you can clearly see.' }
+        ]
+      }],
+      max_tokens: 200,
+      temperature: 0
+    })
+  });
+
+  if (!response.ok) {
+    let errMsg = 'API 錯誤 ' + response.status;
+    try {
+      const err = await response.json();
+      errMsg = err.error?.message || errMsg;
+    } catch(e) {}
+    throw new Error(errMsg);
+  }
+
+  const data = await response.json();
+  const content = data.choices[0].message.content.trim();
+  console.log('AI raw response:', content);
+
+  // Flexible JSON extraction: handle ```json ... ``` blocks, plain JSON, etc.
+  let jsonStr = content;
+  // Remove markdown code blocks
+  const codeBlock = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlock) jsonStr = codeBlock[1].trim();
+  // Find JSON object
+  const jsonMatch = jsonStr.match(/\{[^}]*\}/);
+  if (!jsonMatch) throw new Error('AI 回傳格式異常: ' + content.substring(0, 100));
+
+  const parsed = JSON.parse(jsonMatch[0]);
+  // Ensure numbers
+  if (parsed.sys != null) parsed.sys = parseInt(parsed.sys);
+  if (parsed.dia != null) parsed.dia = parseInt(parsed.dia);
+  if (parsed.hr != null) parsed.hr = parseInt(parsed.hr);
+  return parsed;
+}
+
+// ── API Key Modal ──
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key || !key.startsWith('sk-or-')) {
+    showToast('請輸入有效的 OpenRouter API Key', 'err');
+    return;
+  }
+  localStorage.setItem(API_KEY_STORAGE, key);
+  closeApiModal();
+  showToast('API Key 已儲存！', 'ok');
+  // Retry recognition if there was a pending image
+  if (pendingImageBase64) recognizeWithAI(pendingImageBase64);
+}
+
+function closeApiModal() {
+  document.getElementById('apiModal').classList.remove('show');
+}
+
+// ── Add Record ──
+function addRecord() {
+  const date = document.getElementById('inpDate').value;
+  const sys = parseInt(document.getElementById('inpSys').value);
+  const dia = parseInt(document.getElementById('inpDia').value);
+  const hr = parseInt(document.getElementById('inpHR').value);
+
+  const warns = validate(sys, dia, hr);
+  if (warns.length > 0) {
+    showToast(warns[0], 'err');
+    return;
+  }
+
+  const data = getData();
+  const existing = data.findIndex(r => r.date === date);
+  const rec = { date, sys, dia, hr, med: document.getElementById('inpMed').value.trim(), ts: Date.now() };
+
+  if (existing >= 0) {
+    if (!confirm(`${date} 已有紀錄，要覆蓋嗎？`)) return;
+    data[existing] = rec;
+  } else {
+    data.push(rec);
+  }
+
+  data.sort((a, b) => b.date.localeCompare(a.date));
+  saveData(data);
+  render();
+
+  document.getElementById('inpSys').value = '';
+  document.getElementById('inpDia').value = '';
+  document.getElementById('inpHR').value = '';
+  document.getElementById('inpMed').value = '';
+  document.getElementById('liveWarn').textContent = '';
+  clearPreview();
+
+  const cat = getBPCategory(sys, dia);
+  showToast(`✅ 已儲存 ${date}（${cat.label}）`, 'ok');
+}
+
+// ── Delete Record ──
+function deleteRecord(date) {
+  if (!confirm(`刪除 ${date} 的紀錄？`)) return;
+  saveData(getData().filter(r => r.date !== date));
+  render();
+}
+
+// ── Clear All ──
+function clearAll() {
+  if (!confirm('⚠️ 確定要刪除所有紀錄嗎？此操作無法復原！')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+  showToast('已清除所有紀錄', 'warn');
+}
+
+// ── Render ──
+function render() {
+  const data = getData();
+  const list = document.getElementById('recordList');
+  document.getElementById('countBadge').textContent = data.length > 0 ? `${data.length} 筆` : '';
+  document.getElementById('statsCard').style.display = data.length > 0 ? '' : 'none';
+
+  if (data.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">📝</div>尚無紀錄<br><span style="font-size:0.85em">拍照或手動輸入開始追蹤</span></div>';
+  } else {
+    list.innerHTML = data.map(r => {
+      const cat = getBPCategory(r.sys, r.dia);
+      const dateStr = r.date.slice(5).replace('-', '/');
+      return `<div class="record-item">
+        <span class="rec-date">${dateStr}</span>
+        <span class="rec-bp">${r.sys}/${r.dia} <span class="badge ${cat.cls}">${cat.label}</span></span>
+        <span class="rec-hr">♥${r.hr}</span>
+        <button class="rec-del" onclick="deleteRecord('${r.date}')" aria-label="刪除">×</button>
+      </div>`;
+    }).join('');
+  }
+
+  if (data.length > 0) {
+    document.getElementById('statTotal').textContent = data.length;
+    const avg = (k) => Math.round(data.reduce((s, r) => s + r[k], 0) / data.length);
+    document.getElementById('statAvgSys').textContent = avg('sys');
+    document.getElementById('statAvgDia').textContent = avg('dia');
+    document.getElementById('statAvgHR').textContent = avg('hr');
+  }
+
+  if (chart) updateChart(data);
+}
+
+// ── Chart ──
+function toggleChart() {
+  const sec = document.getElementById('chartSection');
+  if (sec.style.display === 'none' || sec.style.display === '') {
+    sec.style.display = 'block';
+    // Small delay to ensure DOM is visible before chart renders
+    setTimeout(() => updateChart(getData()), 100);
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+function updateChart(data) {
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded yet');
+    return;
+  }
+  if (!data || data.length === 0) return;
+
+  const canvas = document.getElementById('bpChart');
+  if (!canvas) return;
+
+  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
+  // Limit to last 90 data points for performance
+  const display = sorted.length > 90 ? sorted.slice(-90) : sorted;
+  const labels = display.map(r => r.date.slice(5));
+  const ctx = canvas.getContext('2d');
+
+  if (chart) { chart.destroy(); chart = null; }
+
+  try {
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: '收縮壓 SYS', data: display.map(r => r.sys), borderColor: '#f44336', backgroundColor: 'rgba(244,67,54,0.08)', fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#f44336' },
+          { label: '舒張壓 DIA', data: display.map(r => r.dia), borderColor: '#2196F3', backgroundColor: 'rgba(33,150,243,0.08)', fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#2196F3' },
+          { label: '心跳 HR', data: display.map(r => r.hr), borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.05)', fill: false, tension: 0.3, pointRadius: 2, pointBackgroundColor: '#4CAF50', borderDash: [5, 3], yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 600 },
+        interaction: { intersect: false, mode: 'index' },
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } } },
+        scales: {
+          y: { title: { display: true, text: 'mmHg', font: { size: 11 } }, min: 40, max: 200, ticks: { font: { size: 10 } } },
+          y1: { position: 'right', title: { display: true, text: 'bpm', font: { size: 11 } }, min: 40, max: 140, grid: { drawOnChartArea: false }, ticks: { font: { size: 10 } } },
+          x: { ticks: { font: { size: 9 }, maxRotation: 60, autoSkip: true, maxTicksLimit: 20 } }
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Chart render error:', err);
+  }
+}
+
+// ── Color helpers for conditional formatting ──
+function sysColor(val) {
+  if (val < 90) return '#2E7D32';        // 深綠 (低血壓)
+  if (val < 120) return '#66BB6A';       // 淚綠 (正常偏低)
+  if (val < 130) return '#333333';       // 黑 (正常)
+  if (val < 140) return '#F57F17';       // 深黃 (偏高)
+  if (val < 160) return '#E65100';       // 橘紅 (高血壓1期)
+  if (val < 180) return '#C62828';       // 紅 (高血壓2期)
+  return '#B71C1C';                       // 深紅 (危險)
+}
+function sysBg(val) {
+  if (val < 90) return '#E8F5E9';
+  if (val < 120) return '#F1F8E9';
+  if (val < 130) return '#FFFFFF';
+  if (val < 140) return '#FFF8E1';
+  if (val < 160) return '#FFF3E0';
+  if (val < 180) return '#FFEBEE';
+  return '#FFCDD2';
+}
+function diaColor(val) {
+  if (val < 60) return '#1B5E20';        // 深綠 (很低)
+  if (val < 70) return '#388E3C';        // 綠 (偏低)
+  if (val < 80) return '#333333';        // 黑 (正常)
+  if (val < 90) return '#EF6C00';        // 橘 (偏高)
+  if (val < 100) return '#D32F2F';       // 紅 (高血壓1期)
+  if (val < 110) return '#C62828';       // 深紅 (高血壓2期)
+  return '#7F0000';                       // 暗紅 (危險)
+}
+function diaBg(val) {
+  if (val < 60) return '#E8F5E9';
+  if (val < 70) return '#F1F8E9';
+  if (val < 80) return '#FFFFFF';
+  if (val < 90) return '#FFF3E0';
+  if (val < 100) return '#FFEBEE';
+  if (val < 110) return '#FFCDD2';
+  return '#EF9A9A';
+}
+
+// ── Export Excel (HTML table with conditional colors) ──
+function exportExcel() {
+  const data = getData();
+  if (data.length === 0) { showToast('沒有紀錄可匯出', 'warn'); return; }
+
+  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // Build HTML table with inline styles (Excel reads HTML+CSS)
+  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
+<x:ExcelWorksheet><x:Name>血壓紀錄</x:Name></x:ExcelWorksheet>
+</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+<style>
+  table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11pt; }
+  th { background: #2196F3; color: white; padding: 8px 12px; font-weight: bold; text-align: center; border: 1px solid #ccc; }
+  td { padding: 6px 10px; border: 1px solid #ddd; text-align: center; }
+  td.date { font-weight: bold; }
+  td.sys, td.dia { font-weight: bold; font-size: 12pt; }
+  .summary-title { font-size: 14pt; font-weight: bold; color: #2196F3; margin: 20px 0 10px; }
+  .summary-table td { text-align: left; padding: 4px 12px; }
+  .summary-table td:first-child { font-weight: bold; color: #555; }
+  .legend { font-size: 9pt; color: #888; margin-top: 6px; }
+</style>
+</head><body>
+<table>
+<tr>
+  <th>日期</th><th>收縮壓 SYS</th><th>舒張壓 DIA</th><th>心跳 HR</th><th>分類</th><th>異常血壓</th><th>用藥</th>
+</tr>`;
+
+  sorted.forEach(r => {
+    const cat = getBPCategory(r.sys, r.dia);
+    let abnormal = [];
+    if (cat.label === '危險') {
+      abnormal.push('⚠️ 血壓危險，請立即就醫');
+    } else {
+      if (r.sys >= 140) abnormal.push('收縮壓偏高(' + r.sys + ')');
+      else if (r.sys >= 130) abnormal.push('收縮壓略高(' + r.sys + ')');
+      if (r.dia >= 90) abnormal.push('舒張壓偏高(' + r.dia + ')');
+      else if (r.dia >= 80) abnormal.push('舒張壓略高(' + r.dia + ')');
+    }
+    const sc = sysColor(r.sys), sbg = sysBg(r.sys);
+    const dc = diaColor(r.dia), dbg = diaBg(r.dia);
+
+    html += `<tr>
+  <td class="date">${r.date}</td>
+  <td class="sys" style="color:${sc};background:${sbg}">${r.sys}</td>
+  <td class="dia" style="color:${dc};background:${dbg}">${r.dia}</td>
+  <td>${r.hr}</td>
+  <td>${cat.label}</td>
+  <td style="text-align:left;font-size:10pt">${abnormal.join(' | ')}</td>
+  <td style="text-align:left;font-size:10pt">${r.med || ''}</td>
+</tr>`;
+  });
+
+  html += `</table>`;
+
+  // Summary section
+  const avg = (k) => Math.round(sorted.reduce((s, r) => s + r[k], 0) / sorted.length);
+  const cnt = (label) => sorted.filter(r => getBPCategory(r.sys, r.dia).label === label).length;
+
+  html += `
+<div class="summary-title">📊 統計摘要</div>
+<table class="summary-table" style="width:auto">
+  <tr><td>紀錄期間</td><td>${sorted[0].date} ~ ${sorted[sorted.length-1].date}</td></tr>
+  <tr><td>總筆數</td><td>${sorted.length}</td></tr>
+  <tr><td>平均收縮壓</td><td style="color:${sysColor(avg('sys'))};font-weight:bold">${avg('sys')} mmHg</td></tr>
+  <tr><td>平均舒張壓</td><td style="color:${diaColor(avg('dia'))};font-weight:bold">${avg('dia')} mmHg</td></tr>
+  <tr><td>平均心跳</td><td>${avg('hr')} bpm</td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td>✅ 正常</td><td>${cnt('正常')} 次</td></tr>
+  <tr><td>⚠️ 偏高</td><td>${cnt('偏高')} 次</td></tr>
+  <tr><td>🟠 高血壓1期</td><td>${cnt('高血壓1期')} 次</td></tr>
+  <tr><td>🔴 高血壓2期</td><td>${cnt('高血壓2期')} 次</td></tr>
+  <tr><td>🚨 危險</td><td>${cnt('危險')} 次</td></tr>
+</table>
+<p class="legend">🎨 收縮壓：綠色=偏低 | 黑色=正常 | 黃=偏高 | 橘=高血壓1期 | 紅=高血壓2期 | 深紅=危險<br>
+🎨 舒張壓：綠色=偏低 | 黑色=正常 | 橘=偏高 | 紅=高血壓1期 | 深紅=高血壓2期+</p>
+</body></html>`;
+
+  // Download as .xls (Excel reads HTML tables with styles)
+  const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `血壓紀錄_${new Date().toISOString().slice(0,10)}.xls`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📊 Excel 已下載！含條件式顏色', 'ok');
+}
+
+// ── Stepper + Vibration ──
+function vibrate(ms) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+function stepVal(id, delta) {
+  const el = document.getElementById(id);
+  const step = id === 'inpHR' ? 1 : (delta > 0 ? 1 : 1);  // HR step=1, BP step=1
+  let val = parseInt(el.value) || 0;
+  // Set reasonable defaults if empty
+  if (!el.value) {
+    if (id === 'inpSys') val = 120;
+    else if (id === 'inpDia') val = 80;
+    else if (id === 'inpHR') val = 72;
+  }
+  val += delta * step;
+  // Clamp to valid ranges
+  if (id === 'inpSys') val = Math.max(60, Math.min(250, val));
+  else if (id === 'inpDia') val = Math.max(40, Math.min(150, val));
+  else if (id === 'inpHR') val = Math.max(30, Math.min(220, val));
+  el.value = val;
+  // Vibrate feedback (short buzz for each step)
+  vibrate(15);
+  // Trigger validation
+  el.dispatchEvent(new Event('input'));
+}
+
+// ── Live Validation ──
+['inpSys', 'inpDia', 'inpHR'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const sys = parseInt(document.getElementById('inpSys').value) || 0;
+    const dia = parseInt(document.getElementById('inpDia').value) || 0;
+    const hr = parseInt(document.getElementById('inpHR').value) || 0;
+    const warnEl = document.getElementById('liveWarn');
+    const warns = [];
+
+    const sysWrap = document.getElementById('sysWrap');
+    const diaWrap = document.getElementById('diaWrap');
+    const hrWrap = document.getElementById('hrWrap');
+    sysWrap.className = 'stepper-wrap'; diaWrap.className = 'stepper-wrap'; hrWrap.className = 'stepper-wrap';
+
+    if (sys > 0) {
+      if (sys < 60 || sys > 250) { sysWrap.classList.add('danger'); warns.push('收縮壓超出範圍 60-250'); }
+      else if (sys > 200) sysWrap.classList.add('warn');
+    }
+    if (dia > 0) {
+      if (dia < 40 || dia > 150) { diaWrap.classList.add('danger'); warns.push('舒張壓超出範圍 40-150'); }
+    }
+    if (hr > 0) {
+      if (hr < 30 || hr > 220) { hrWrap.classList.add('danger'); warns.push('心跳超出範圍 30-220'); }
+    }
+    if (sys > 0 && dia > 0 && dia >= sys) warns.push('⚠️ 舒張壓 ≥ 收縮壓');
+    warnEl.textContent = warns[0] || '';
+  });
+});
+
+// ── Import from Excel (pre-loaded data) ──
+
+// ── Excel File Import (SheetJS) ──
+document.getElementById('excelFileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var wb = XLSX.read(ev.target.result, { type: 'array' });
+      var records = [];
+      function excelDate(serial) {
+        if (typeof serial !== 'number') return null;
+        var d = new Date((serial - 25569) * 86400000);
+        return d.toISOString().slice(0, 10);
+      }
+      for (var si = 0; si < wb.SheetNames.length; si++) {
+        var ws = wb.Sheets[wb.SheetNames[si]];
+        var data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        var currentMed = '';
+        for (var i = 1; i < data.length; i++) {
+          var row = data[i];
+          if (!row[0] || typeof row[0] !== 'number') continue;
+          var date = excelDate(row[0]);
+          if (!date) continue;
+          var sys = parseInt(row[2]) || parseInt(row[5]) || 0;
+          var dia = parseInt(row[3]) || parseInt(row[6]) || 0;
+          var hr = parseInt(row[4]) || parseInt(row[7]) || 0;
+          var remark = (row[8] || '').toString().trim();
+          if (!sys && !dia && !hr) continue;
+          if (sys > 300 || dia > 200 || hr > 250) continue;
+          if (remark && remark.length > 3) currentMed = remark;
+          records.push({ date: date, sys: sys, dia: dia, hr: hr, med: currentMed });
+        }
+      }
+      var seen = {};
+      records.forEach(function(r) { seen[r.date] = r; });
+      var unique = Object.values(seen).sort(function(a, b) { return b.date.localeCompare(a.date); });
+      if (unique.length === 0) {
+        showToast('找不到有效的血壓資料', 'err');
+        return;
+      }
+      var existing = getData();
+      var existingDates = {};
+      existing.forEach(function(r) { existingDates[r.date] = true; });
+      var added = 0, skipped = 0;
+      unique.forEach(function(r) {
+        if (!existingDates[r.date]) {
+          existing.push({ date: r.date, sys: r.sys, dia: r.dia, hr: r.hr, med: r.med || '', ts: Date.now() });
+          added++;
+        } else { skipped++; }
+      });
+      existing.sort(function(a, b) { return b.date.localeCompare(a.date); });
+      saveData(existing);
+      render();
+      showToast('已匯入 ' + added + ' 筆（跳過 ' + skipped + ' 筆重覆）', 'ok');
+    } catch (err) {
+      console.error('Import error:', err);
+      showToast('匯入失敗：' + err.message, 'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+});
+
+// ── Init ──
+// ── Init ──
+document.getElementById('inpDate').valueAsDate = new Date();
+render();
+</script>
+</body>
+</html>
